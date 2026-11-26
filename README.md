@@ -97,6 +97,8 @@ Fractal Garden Hackathon/
 ├── AI_PROMPT_LOGS.md           # Complete Markdown AI prompt & response chain
 ├── ai-logs/
 │   └── transcript_full.jsonl   # Complete raw JSONL agent session log
+├── claude-logs/
+│   └── README.md               # Shared Claude conversation link
 ├── assets/
 │   └── audio/
 │       ├── trunk.mp3           # Trunk sound sample
@@ -121,3 +123,4 @@ The full prompt chain and AI coding agent transcript used to build **Fractal Gar
 
 - [AI_PROMPT_LOGS.md](AI_PROMPT_LOGS.md) — Clean chronological Markdown log of every user prompt and assistant response.
 - [ai-logs/transcript_full.jsonl](ai-logs/transcript_full.jsonl) — Complete unedited JSONL session transcript exported from Google Antigravity (`dfb5f90a-1f5e-43b9-a532-96b0fc69408b`).
+- [claude-logs/README.md](claude-logs/README.md) — Shared Claude conversation log link: https://claude.ai/share/96dbd822-0aba-41d3-a427-ca7dfd439326
