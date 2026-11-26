@@ -94,6 +94,9 @@ Fractal Garden Hackathon/
 ├── style.css                   # Night garden theme, desktop sidebar & mobile bottom sheet
 ├── README.md                   # Project documentation
 ├── CREDITS.md                  # Audio credits and attribution
+├── AI_PROMPT_LOGS.md           # Complete Markdown AI prompt & response chain
+├── ai-logs/
+│   └── transcript_full.jsonl   # Complete raw JSONL agent session log
 ├── assets/
 │   └── audio/
 │       ├── trunk.mp3           # Trunk sound sample
@@ -109,3 +112,12 @@ Fractal Garden Hackathon/
     ├── audio-export.js         # OfflineAudioContext renderer & 16-bit WAV encoder
     └── main.js                 # UI wiring, presets, focus mode, sleep timer & shortcuts
 ```
+
+---
+
+## AI Prompt Logs
+
+The full prompt chain and AI coding agent transcript used to build **Fractal Garden** are included in this repository:
+
+- [AI_PROMPT_LOGS.md](AI_PROMPT_LOGS.md) — Clean chronological Markdown log of every user prompt and assistant response.
+- [ai-logs/transcript_full.jsonl](ai-logs/transcript_full.jsonl) — Complete unedited JSONL session transcript exported from Google Antigravity (`dfb5f90a-1f5e-43b9-a532-96b0fc69408b`).
