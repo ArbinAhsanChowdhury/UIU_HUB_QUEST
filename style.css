@@ -298,7 +298,7 @@ kbd {
   bottom: var(--space-4);
   transform: translateX(-50%);
   width: fit-content;
-  max-width: min(1080px, calc(100% - 24px));
+  max-width: min(1140px, calc(100% - 24px));
   padding: 10px 14px;
   border-radius: var(--radius-panel);
   background: var(--bg-surface);
@@ -317,7 +317,7 @@ kbd {
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: var(--space-2) 10px;
+  gap: var(--space-2) 12px;
 }
 
 .dock-play {
@@ -329,11 +329,13 @@ kbd {
   display: flex;
   align-items: center;
   gap: 6px;
-  flex: 0 1 215px;
-  min-width: 180px;
+  flex: 0 1 auto;
+  width: auto;
+  max-width: 100%;
 }
 
 .dock-label {
+  flex: 0 0 auto;
   font-size: 0.82rem;
   font-weight: 500;
   color: var(--text-secondary);
@@ -341,19 +343,35 @@ kbd {
 }
 
 .dock-volume input[type="range"] {
-  flex: 1 1 72px;
+  width: 88px;
+  flex: 1 1 88px;
   min-width: 64px;
+}
+
+.dock-volume .value-badge {
+  flex: 0 0 auto;
+}
+
+.dock-volume .btn-pill {
+  flex: 0 0 auto;
+  min-width: 66px;
+  white-space: nowrap;
 }
 
 .dock-presets {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 6px;
+  flex: 0 1 auto;
+  max-width: 100%;
 }
 
 .dock-presets .btn-preset {
+  flex: 0 0 auto;
   padding: 8px 10px;
   font-size: 0.82rem;
+  white-space: nowrap;
 }
 
 .dock-export {
@@ -1050,6 +1068,17 @@ kbd {
 
   .dock-volume {
     flex: 1 1 180px;
+    min-width: 0;
+  }
+
+  .dock-volume input[type="range"] {
+    width: auto;
+    flex: 1 1 56px;
+    min-width: 52px;
+  }
+
+  .dock-volume .btn-pill {
+    min-width: 62px;
   }
 
   .dock-label {
