@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fractal Garden</title>
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23041019'/%3E%3Cpath d='M32 54V30M32 34L20 20M32 34L44 20' stroke='%237ce8c8' stroke-width='4' stroke-linecap='round' fill='none'/%3E%3Ccircle cx='20' cy='18' r='4' fill='%23a8f5d6'/%3E%3Ccircle cx='44' cy='18' r='4' fill='%23a8f5d6'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="welcome-overlay" id="welcome-overlay" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
+    <div class="welcome-card">
+      <p class="welcome-kicker">Interactive Generative Soundscape</p>
+      <h1 id="welcome-title">Fractal Garden</h1>
+      <p class="welcome-desc">
+        Watch a recursive binary tree grow in a quiet night garden while every branch and leaf becomes gentle pentatonic
+        music.
+      </p>
+      <div class="welcome-highlights" aria-hidden="true">
+        <span class="welcome-chip">Recursive Growth</span>
+        <span class="welcome-chip">Pentatonic Harmony</span>
+        <span class="welcome-chip">44.1 kHz WAV Export</span>
+      </div>
+      <button type="button" id="enter-garden-btn" class="btn btn-primary btn-welcome">
+        Enter the Garden
+      </button>
+      <p class="welcome-note">Audio starts softly when you enter.</p>
+    </div>
+  </div>
+
+  <div class="app-shell is-panel-collapsed" id="app-shell">
+    <main class="garden-stage" aria-label="Fractal tree canvas">
+      <canvas id="garden-canvas" role="img" aria-label="Recursive fractal tree growing in a calm night garden"></canvas>
+
+      <div class="stage-top-bar">
+        <div class="stage-overlay-left">
+          <div class="status-pill" id="status-pill" aria-live="polite">
+            <span class="status-dot" id="status-dot" aria-hidden="true"></span>
+            <span id="status-text">Preview ready</span>
+          </div>
+
+          <div class="live-readout" id="live-readout" aria-label="Live recursion and harmony readout">
+            <span>Depth <strong id="readout-depth">0 / 7</strong></span>
+            <span aria-hidden="true">·</span>
+            <span>Branches <strong id="readout-branches">0 / 127</strong></span>
+            <span aria-hidden="true">·</span>
+            <span>Leaves <strong id="readout-leaves">0 / 64</strong></span>
+            <span aria-hidden="true">·</span>
+            <span class="readout-sound"><strong id="readout-sound">— · Cadd9</strong></span>
+          </div>
+        </div>
+
+        <div class="stage-toolbar" role="toolbar" aria-label="View controls">
+          <button type="button" id="panel-toggle-btn" class="btn btn-toolbar" aria-expanded="false"
+            aria-controls="control-panel">
+            Controls
+          </button>
+          <button type="button" id="focus-btn" class="btn btn-toolbar" aria-pressed="false">
+            Focus mode
+          </button>
+          <button type="button" id="fullscreen-btn" class="btn btn-toolbar" aria-pressed="false">
+            Fullscreen
+          </button>
+        </div>
+      </div>
+
+      <section class="essential-dock" id="essential-dock" aria-label="Essential garden controls">
+        <div class="dock-main-row">
+          <button type="button" id="play-pause-btn" class="btn btn-primary dock-play">
+            Play
+          </button>
+
+          <div class="dock-volume">
+            <label for="master-vol-input" class="dock-label">Volume</label>
+            <input type="range" id="master-vol-input" min="0" max="1" step="0.01" value="0.8" aria-label="Master volume">
+            <output id="master-vol-value" for="master-vol-input" class="value-badge">80%</output>
+            <button type="button" id="mute-btn" class="btn btn-secondary btn-pill" aria-pressed="false">
+              Mute
+            </button>
+          </div>
+
+          <div class="dock-presets" role="group" aria-label="Garden presets">
+            <button type="button" class="btn btn-secondary btn-preset" data-preset="calm-rain">
+              Calm Rain
+            </button>
+            <button type="button" class="btn btn-secondary btn-preset" data-preset="moonlit-night">
+              Moonlit Night
+            </button>
+            <button type="button" class="btn btn-secondary btn-preset" data-preset="deep-forest">
+              Deep Forest
+            </button>
+          </div>
+
+          <div class="dock-export">
+            <label for="export-length-select" class="sr-only">Export length</label>
+            <select id="export-length-select" class="select-input select-export">
+              <option value="full" selected>Full tree once</option>
+              <option value="1m">1 minute</option>
+              <option value="3m">3 minutes</option>
+            </select>
+            <button type="button" id="download-wav-btn" class="btn btn-secondary btn-export">
+              Download composition (WAV)
+            </button>
+          </div>
+        </div>
+
+        <div class="export-progress-wrap" id="export-progress-wrap" hidden>
+          <div class="progress-track" aria-hidden="true">
+            <div class="progress-fill" id="export-progress-fill"></div>
+          </div>
+        </div>
+
+        <p class="audio-notice dock-notice" id="export-status" role="status" aria-live="polite" hidden></p>
+      </section>
+    </main>
+
+    <aside class="control-panel" id="control-panel" aria-label="Advanced garden parameters" aria-hidden="true">
+      <header class="panel-header">
+        <div class="title-row">
+          <h2>Garden Controls</h2>
+          <button type="button" id="panel-close-btn" class="btn btn-ghost btn-pill" aria-label="Close controls panel">
+            Close
+          </button>
+        </div>
+        <p class="subtitle">Fine-tune recursion, harmony, layers, and timer.</p>
+      </header>
+
+      <section class="playback-section" aria-label="Transport and timer">
+        <div class="button-row-2">
+          <button type="button" id="stop-btn" class="btn btn-ghost">
+            Stop
+          </button>
+          <button type="button" id="restart-btn" class="btn btn-secondary">
+            Restart
+          </button>
+          <button type="button" id="reset-defaults-btn" class="btn btn-ghost">
+            Reset defaults
+          </button>
+        </div>
+
+        <div class="progress-block">
+          <div class="progress-track" id="progress-bar" role="progressbar" aria-label="Growth playback progress"
+            aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+
+          <div class="progress-meta">
+            <span class="time-readout" id="time-readout">0:00.0 / 0:04.5</span>
+            <button type="button" id="loop-btn" class="btn btn-secondary btn-pill" aria-pressed="false">
+              Loop: Off
+            </button>
+          </div>
+        </div>
+
+        <div class="sleep-row">
+          <label for="sleep-timer-select" class="sleep-label">Sleep timer</label>
+          <div class="sleep-controls">
+            <select id="sleep-timer-select" class="select-input select-sleep">
+              <option value="0" selected>Off</option>
+              <option value="5">5 min</option>
+              <option value="10">10 min</option>
+              <option value="20">20 min</option>
+            </select>
+            <span class="value-badge sleep-badge" id="sleep-countdown" hidden>05:00</span>
+          </div>
+        </div>
+      </section>
+
+      <details class="panel-group">
+        <summary class="group-summary">Tree</summary>
+        <div class="group-body">
+          <div class="control-group">
+            <div class="label-row">
+              <label for="depth-input">Depth</label>
+              <output id="depth-value" for="depth-input" class="value-badge">7</output>
+            </div>
+            <input type="range" id="depth-input" min="1" max="10" step="1" value="7">
+            <p class="helper-text">Adds branching layers visually and higher, sparser notes.</p>
+          </div>
+
+          <div class="control-group">
+            <div class="label-row">
+              <label for="angle-input">Branch angle</label>
+              <output id="angle-value" for="angle-input" class="value-badge">25°</output>
+            </div>
+            <input type="range" id="angle-input" min="10" max="60" step="1" value="25">
+            <p class="helper-text">Widens canopy spread and left/right stereo panning.</p>
+          </div>
+
+          <div class="control-group">
+            <div class="label-row">
+              <label for="ratio-input">Length ratio</label>
+              <output id="ratio-value" for="ratio-input" class="value-badge">0.72</output>
+            </div>
+            <input type="range" id="ratio-input" min="0.5" max="0.8" step="0.01" value="0.72">
+            <p class="helper-text">Extends outer branches and subtly lengthens growth phrasing.</p>
+          </div>
+
+          <div class="control-group">
+            <div class="label-row">
+              <label for="randomness-input">Randomness</label>
+              <output id="randomness-value" for="randomness-input" class="value-badge">0.20</output>
+            </div>
+            <input type="range" id="randomness-input" min="0" max="1" step="0.01" value="0.2">
+            <p class="helper-text">Adds organic asymmetry to branches and note timing.</p>
+          </div>
+
+          <div class="control-group">
+            <div class="label-row">
+              <label for="speed-input">Growth speed</label>
+              <output id="speed-value" for="speed-input" class="value-badge">1.0x</output>
+            </div>
+            <input type="range" id="speed-input" min="0.5" max="2" step="0.1" value="1">
+            <p class="helper-text">Scales animation growth speed and branch note pacing.</p>
+          </div>
+
+          <div class="control-group seed-group">
+            <div class="label-row">
+              <label for="seed-input">Seed</label>
+            </div>
+            <div class="seed-row">
+              <input type="number" id="seed-input" min="0" max="999999" step="1" value="4217" inputmode="numeric">
+              <button type="button" id="new-seed-btn" class="btn btn-secondary btn-compact">
+                New seed
+              </button>
+            </div>
+            <p class="helper-text">Reproduces the exact same tree shape and branch order.</p>
+          </div>
+        </div>
+      </details>
+
+      <details class="panel-group">
+        <summary class="group-summary">Music</summary>
+        <div class="group-body">
+          <div class="control-group">
+            <div class="label-row">
+              <label for="scale-select">Scale / mood</label>
+            </div>
+            <select id="scale-select" class="select-input">
+              <option value="c-major" selected>C major pentatonic (Calm)</option>
+              <option value="a-minor">A minor pentatonic (Dreamy)</option>
+            </select>
+            <p class="helper-text">Shifts branch melodies between bright Calm and Dreamy minor.</p>
+          </div>
+
+          <div class="control-group">
+            <div class="label-row">
+              <label for="tempo-input">Tempo</label>
+              <output id="tempo-value" for="tempo-input" class="value-badge">70 BPM</output>
+            </div>
+            <input type="range" id="tempo-input" min="50" max="90" step="1" value="70">
+            <p class="helper-text">Beat grid (50–90 BPM) for note rhythm; applies from next play.</p>
+          </div>
+
+          <div class="control-group">
+            <span class="label-text" id="reverb-preset-label">Reverb space</span>
+            <div class="segmented-group segmented-group-3" role="group" aria-labelledby="reverb-preset-label">
+              <button type="button" class="btn btn-seg" data-reverb-preset="small-garden" aria-pressed="false">Small
+                Garden</button>
+              <button type="button" class="btn btn-seg is-active" data-reverb-preset="forest"
+                aria-pressed="true">Forest</button>
+              <button type="button" class="btn btn-seg" data-reverb-preset="open-sky" aria-pressed="false">Open
+                Sky</button>
+            </div>
+            <p class="helper-text">Crossfades acoustic space between intimate garden and open sky.</p>
+          </div>
+
+          <div class="control-group">
+            <div class="label-row">
+              <label for="reverb-input">Reverb</label>
+              <output id="reverb-value" for="reverb-input" class="value-badge">42%</output>
+            </div>
+            <input type="range" id="reverb-input" min="0" max="1" step="0.01" value="0.42">
+            <p class="helper-text">Blends gentle reverb (stronger on leaves &amp; pad, subtle on rain).</p>
+          </div>
+        </div>
+      </details>
+
+      <details class="panel-group">
+        <summary class="group-summary">Volume &amp; Layers</summary>
+        <div class="group-body">
+          <div class="control-group">
+            <div class="label-row">
+              <label for="notes-vol-input">Notes</label>
+              <output id="notes-vol-value" for="notes-vol-input" class="value-badge">80%</output>
+            </div>
+            <input type="range" id="notes-vol-input" min="0" max="1" step="0.01" value="0.8">
+            <p class="helper-text">Loudness of trunk and pitched branch notes (live).</p>
+          </div>
+
+          <div class="control-group">
+            <div class="label-row">
+              <label for="leaves-vol-input">Leaves</label>
+              <output id="leaves-vol-value" for="leaves-vol-input" class="value-badge">70%</output>
+            </div>
+            <input type="range" id="leaves-vol-input" min="0" max="1" step="0.01" value="0.7">
+            <p class="helper-text">Loudness of soft leaf chimes with gentle filtered delay.</p>
+          </div>
+
+          <div class="control-group">
+            <div class="label-row">
+              <label for="ambient-vol-input">Ambient</label>
+              <output id="ambient-vol-value" for="ambient-vol-input" class="value-badge">52%</output>
+            </div>
+            <input type="range" id="ambient-vol-input" min="0" max="1" step="0.01" value="0.52">
+            <p class="helper-text">Overall balance of all active ambient garden layers.</p>
+          </div>
+
+          <div class="layers-stack" aria-label="Ambient layers">
+            <div class="layer-card">
+              <div class="label-row">
+                <label for="rain-vol-input">Rain</label>
+                <div class="inline-actions">
+                  <output id="rain-vol-value" for="rain-vol-input" class="value-badge">48%</output>
+                  <button type="button" id="rain-toggle" class="btn btn-secondary btn-pill is-active"
+                    aria-pressed="true" aria-label="Toggle Rain layer">On</button>
+                </div>
+              </div>
+              <input type="range" id="rain-vol-input" min="0" max="1" step="0.01" value="0.48">
+              <p class="helper-text">Seamless crossfaded rain recording with minimal reverb.</p>
+            </div>
+
+            <div class="layer-card">
+              <div class="label-row">
+                <label for="night-vol-input">Night</label>
+                <div class="inline-actions">
+                  <output id="night-vol-value" for="night-vol-input" class="value-badge">52%</output>
+                  <button type="button" id="night-toggle" class="btn btn-secondary btn-pill is-active"
+                    aria-pressed="true" aria-label="Toggle Night layer">On</button>
+                </div>
+              </div>
+              <input type="range" id="night-vol-input" min="0" max="1" step="0.01" value="0.52">
+              <p class="helper-text">Seamless night crickets &amp; garden air loop.</p>
+            </div>
+
+            <div class="layer-card">
+              <div class="label-row">
+                <label for="pad-vol-input">Pad</label>
+                <div class="inline-actions">
+                  <output id="pad-vol-value" for="pad-vol-input" class="value-badge">46%</output>
+                  <button type="button" id="pad-toggle" class="btn btn-secondary btn-pill is-active" aria-pressed="true"
+                    aria-label="Toggle Pad layer">On</button>
+                </div>
+              </div>
+              <input type="range" id="pad-vol-input" min="0" max="1" step="0.01" value="0.46">
+              <p class="helper-text">Soft harmonic chord pad that guides branch notes.</p>
+            </div>
+
+            <div class="layer-card">
+              <div class="label-row">
+                <label for="wind-vol-input">Wind</label>
+                <div class="inline-actions">
+                  <output id="wind-vol-value" for="wind-vol-input" class="value-badge">36%</output>
+                  <button type="button" id="wind-toggle" class="btn btn-secondary btn-pill is-active"
+                    aria-pressed="true" aria-label="Toggle Wind layer">On</button>
+                </div>
+              </div>
+              <input type="range" id="wind-vol-input" min="0" max="1" step="0.01" value="0.36">
+              <p class="helper-text">Procedural gentle breeze with slowly shifting gusts.</p>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <details class="panel-group" id="how-it-works-panel">
+        <summary class="group-summary">How it works</summary>
+        <div class="group-body how-body">
+          <p class="how-item">
+            <strong>Depth:</strong> Starting from <code>depth = 1</code> at the trunk, every branch splits recursively
+            into smaller <em>left</em> and <em>right</em> child branches until reaching the chosen depth.
+          </p>
+          <p class="how-item">
+            <strong>Base case:</strong> When <code>depth === maxDepth</code>, recursion stops and blooms into a glowing
+            leaf tip. Children only start growing after their parent finishes.
+          </p>
+          <p class="how-item">
+            <strong>Branch to sound:</strong> The trunk plays the low root anchor; deeper branches climb up the
+            pentatonic scale quietly, pan left/right by horizontal position, and harmonize with the pad chord on the
+            beat grid.
+          </p>
+        </div>
+      </details>
+
+      <footer class="panel-footer">
+        <p class="audio-notice" id="audio-status" role="status" aria-live="polite">
+          Click Enter the Garden or Play to start audio.
+        </p>
+        <p class="tree-meta" id="tree-meta">127 branches · 64 leaves · 4.5s</p>
+        <p class="shortcuts-hint">
+          Keys: <kbd>Space</kbd> play/pause · <kbd>M</kbd> mute · <kbd>R</kbd> restart · <kbd>F</kbd> focus
+        </p>
+      </footer>
+    </aside>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+
+</html>
